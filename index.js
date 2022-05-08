@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 const cors = require("cors");
 const pool = require("./db");
-const res = require('express/lib/response');
 const PORT = process.env.PORT || 5000;
 const path = require("path");
 
@@ -13,6 +12,13 @@ app.use(express.json());
 if(process.env.NODE_ENV === "production"){
     app.use(express.static(path.join(__dirname,"client/build")));
 }
+
+//show todos
+app.get("/todos", async(req,res)=>{
+    const allTodos = await pool.query("SELECT * FROM todo");
+    res.json(allTodos.rows);
+});
+
 //Create
 app.post("/todos", async (req,res)=>{
     
@@ -26,11 +32,7 @@ app.post("/todos", async (req,res)=>{
     
     
 });
-//show todos
-app.get("/todos", async(req,res)=>{
-    const allTodos = await pool.query("SELECT * FROM todo");
-    res.json(allTodos.rows);
-});
+
  
 //show specific todo
 app.get("/todos/:id", async(req,res)=>{
@@ -60,7 +62,9 @@ app.delete("/todos/:id", async(req, res)=>{
     res.json("Todo was deleted");
 });
 
-
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "client/build/index.html"));
+  });
 
 app.listen(PORT, () =>{
     console.log(`listening on port ${PORT}`);

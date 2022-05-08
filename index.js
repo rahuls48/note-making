@@ -4,10 +4,16 @@ const cors = require("cors");
 const pool = require("./db");
 const res = require('express/lib/response');
 const PORT = process.env.PORT || 5000;
+const path = require("path");
 
 app.use(cors());
 app.use(express.json());
 
+app.use(express.static(path.join(__dirname,"client/build")));
+
+if(process.env.NODE_ENV === "production"){
+    app.use(express.static(path.join(__dirname,"client/build")));
+}
 //Create
 app.post("/todos", async (req,res)=>{
     
@@ -28,7 +34,6 @@ app.get("/todos", async(req,res)=>{
 });
  
 //show specific todo
-
 app.get("/todos/:id", async(req,res)=>{
     const { id } = req.params;
     const todo = await pool.query("SELECT * FROM todo WHERE todo_id =$1",[
@@ -38,7 +43,7 @@ app.get("/todos/:id", async(req,res)=>{
 
 });
 
-//updating the todo list based in id
+//updating the todo list based on id
 app.put("/todos/:id", async (req, res)=>{
     const { id } = req.params;
     const {description} = req.body;
